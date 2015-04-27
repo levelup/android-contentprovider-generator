@@ -20,7 +20,10 @@ import ${config.providerJavaPackage}.${entity.packageName}.${entity.nameCamelCas
  */
 public class ${entity.nameCamelCase}Columns implements BaseColumns {
     public static final String TABLE_NAME = "${entity.nameLowerCase}";
-    public static final Uri CONTENT_URI = Uri.parse(${config.providerClassName}.CONTENT_URI_BASE + "/" + TABLE_NAME);
+    
+    public static Uri getContentUri() {
+        return Uri.parse(${config.providerClassName}.getContentUriBase() + "/" + TABLE_NAME);
+    }
 
     <#list entity.fields as field>
         <#if field.documentation??>

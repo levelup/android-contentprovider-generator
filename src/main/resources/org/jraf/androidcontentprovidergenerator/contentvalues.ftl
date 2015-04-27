@@ -20,7 +20,7 @@ import ${config.providerJavaPackage}.base.AbstractContentValues;
 public class ${entity.nameCamelCase}ContentValues extends AbstractContentValues {
     @Override
     public Uri uri() {
-        return ${entity.nameCamelCase}Columns.CONTENT_URI;
+        return ${entity.nameCamelCase}Columns.getContentUri();
     }
 
     /**

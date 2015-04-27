@@ -21,6 +21,9 @@ import ${config.providerJavaPackage}.base.BaseContentProvider;
 import ${config.providerJavaPackage}.${entity.packageName}.${entity.nameCamelCase}Columns;
 </#list>
 
+import java.lang.reflect.Field;
+
+
 public class ${config.providerClassName} extends BaseContentProvider {
     private static final String TAG = ${config.providerClassName}.class.getSimpleName();
 
@@ -31,8 +34,33 @@ public class ${config.providerClassName} extends BaseContentProvider {
 
 	<#assign authority = "\"" + config.authority?replace(r"${applicationId}", "\" + BuildConfig.APPLICATION_ID + \"") + "\"">
 	<#assign authority = authority?replace(r'^"* \+ (.*?)', r"$1", "r")?replace(r'(.*?) \+ "*$', r"$1", "r")>
-    public static final String AUTHORITY = ${authority};
+    public static String AUTHORITY = initAuthority();
+    
+    public static String initAuthority() {
+        String authority = ${authority};
+
+        try {
+
+            ClassLoader loader = ${config.providerClassName}.class.getClassLoader();
+
+            Class<?> clz = loader.loadClass("com.levelup.palabre.api.provider.PalabreApiProviderAuthority");
+            Field declaredField = clz.getDeclaredField("CONTENT_AUTHORITY");
+
+            authority = declaredField.get(null).toString();
+        } catch (ClassNotFoundException e) {}
+        catch (NoSuchFieldException e) {}
+        catch (IllegalArgumentException e) {
+        } catch (IllegalAccessException e) {
+        }
+
+        return authority;
+    }
+    
     public static final String CONTENT_URI_BASE = "content://" + AUTHORITY;
+    
+    public static String getContentUriBase() {
+        return "content://" + AUTHORITY;
+    }
 
 	<#assign i=0>
     <#list model.entities as entity>
@@ -43,14 +71,19 @@ public class ${config.providerClassName} extends BaseContentProvider {
 
     </#list>
 
+	public static void switchAuthority(String newAuthority) {
+        AUTHORITY = newAuthority;
 
-    private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-
-    static {
         <#list model.entities as entity>
         URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME, URI_TYPE_${entity.nameUpperCase});
         URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
         </#list>
+    }
+
+    private static UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+
+    static {
+       	switchAuthority(AUTHORITY);
     }
 
     @Override

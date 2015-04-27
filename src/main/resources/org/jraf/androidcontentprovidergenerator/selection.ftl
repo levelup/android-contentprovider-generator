@@ -13,6 +13,7 @@ import ${config.providerJavaPackage}.base.AbstractSelection;
 <#list entity.joinedEntities as joinedEntity>
 import ${config.providerJavaPackage}.${joinedEntity.packageName}.*;
 </#list>
+import ${config.providerJavaPackage}.${config.providerClassName};
 
 /**
  * Selection for the {@code ${entity.nameLowerCase}} table.
@@ -20,7 +21,7 @@ import ${config.providerJavaPackage}.${joinedEntity.packageName}.*;
 public class ${entity.nameCamelCase}Selection extends AbstractSelection<${entity.nameCamelCase}Selection> {
     @Override
     protected Uri baseUri() {
-        return ${entity.nameCamelCase}Columns.CONTENT_URI;
+        return Uri.parse(${config.providerClassName}.getContentUriBase() + "/" + ${entity.nameCamelCase}Columns.TABLE_NAME);
     }
 
     /**
