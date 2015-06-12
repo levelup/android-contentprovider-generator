@@ -47,10 +47,8 @@ public class ${config.providerClassName} extends BaseContentProvider {
             Field declaredField = clz.getDeclaredField("CONTENT_AUTHORITY");
 
             authority = declaredField.get(null).toString();
-        } catch (ClassNotFoundException e) {}
-        catch (NoSuchFieldException e) {}
-        catch (IllegalArgumentException e) {
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
+            Log.e(TAG, e.getMessage(), e);
         }
 
         return authority;
@@ -61,6 +59,10 @@ public class ${config.providerClassName} extends BaseContentProvider {
     public static String getContentUriBase() {
         return "content://" + AUTHORITY;
     }
+    
+    public static String getContentUriBase(String authority) {
+        return "content://" + authority;
+    }
 
 	<#assign i=0>
     <#list model.entities as entity>
@@ -70,6 +72,8 @@ public class ${config.providerClassName} extends BaseContentProvider {
     <#assign i = i + 1>
 
     </#list>
+    
+    ${config.typeConstantDeclaration}
 
 	public static void switchAuthority(String newAuthority) {
         AUTHORITY = newAuthority;
@@ -78,6 +82,19 @@ public class ${config.providerClassName} extends BaseContentProvider {
         URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME, URI_TYPE_${entity.nameUpperCase});
         URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
         </#list>
+        
+        ${config.uriMatcherComplement}
+    }
+
+	public static void addAuthority(String newAuthority) {
+        AUTHORITY = newAuthority;
+
+        <#list model.entities as entity>
+        URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME, URI_TYPE_${entity.nameUpperCase});
+        URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
+        </#list>
+        
+        ${config.uriMatcherComplement}
     }
 
     private static UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
@@ -107,6 +124,7 @@ public class ${config.providerClassName} extends BaseContentProvider {
                 return TYPE_CURSOR_ITEM + ${entity.nameCamelCase}Columns.TABLE_NAME;
 
             </#list>
+            ${config.typeComplement}
         }
         return null;
     }
@@ -148,6 +166,10 @@ public class ${config.providerClassName} extends BaseContentProvider {
         QueryParams res = new QueryParams();
         String id = null;
         int matchedId = URI_MATCHER.match(uri);
+        if (matchedId == -1 && !uri.getAuthority().equals(AUTHORITY)) {
+            addAuthority(uri.getAuthority());
+            matchedId = URI_MATCHER.match(uri);
+        }
         switch (matchedId) {
             <#list model.entities as entity>
             case URI_TYPE_${entity.nameUpperCase}:
@@ -159,6 +181,7 @@ public class ${config.providerClassName} extends BaseContentProvider {
                 break;
 
             </#list>
+             ${config.getTypeComplement}
             default:
                 throw new IllegalArgumentException("The uri '" + uri + "' is not supported by this ContentProvider");
         }

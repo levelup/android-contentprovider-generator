@@ -285,8 +285,22 @@ public abstract class AbstractSelection<T extends AbstractSelection<?>> {
         if (mLimit != null) uri = BaseContentProvider.limit(uri, String.valueOf(mLimit));
         return uri;
     }
+    
+    /**
+     * Returns the {@code uri} argument to pass to the {@code ContentResolver} methods.
+     */
+    public Uri uri(String authority) {
+        Uri uri = baseUri(authority);
+        if (mNotify != null) uri = BaseContentProvider.notify(uri, mNotify);
+        if (mGroupBy != null) uri = BaseContentProvider.groupBy(uri, mGroupBy);
+        if (mHaving != null) uri = BaseContentProvider.having(uri, mHaving);
+        if (mLimit != null) uri = BaseContentProvider.limit(uri, String.valueOf(mLimit));
+        return uri;
+    }
 
     protected abstract Uri baseUri();
+    
+    protected abstract Uri baseUri(String authority);
 
     /**
      * Deletes row(s) specified by this selection.
@@ -296,6 +310,16 @@ public abstract class AbstractSelection<T extends AbstractSelection<?>> {
      */
     public int delete(ContentResolver contentResolver) {
         return contentResolver.delete(uri(), sel(), args());
+    }
+
+    /**
+     * Deletes row(s) specified by this selection.
+     *
+     * @param contentResolver The content resolver to use.
+     * @return The number of rows deleted.
+     */
+    public int delete(String authority, ContentResolver contentResolver) {
+        return contentResolver.delete(baseUri(authority), sel(), args());
     }
 
     @SuppressWarnings("unchecked")

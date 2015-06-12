@@ -20,11 +20,11 @@ import ${config.providerJavaPackage}.${entity.packageName}.${entity.nameCamelCas
 public class ${config.sqliteOpenHelperClassName} extends SQLiteOpenHelper {
     private static final String TAG = ${config.sqliteOpenHelperClassName}.class.getSimpleName();
 
-    public static final String DATABASE_FILE_NAME = "${config.databaseFileName}";
     private static final int DATABASE_VERSION = ${config.databaseVersion};
     private static ${config.sqliteOpenHelperClassName} sInstance;
     private final Context mContext;
     private final ${config.sqliteOpenHelperCallbacksClassName} mOpenHelperCallbacks;
+    private String dbName = "${config.databaseFileName}";
 
     // @formatter:off
     <#list model.entities as entity>
@@ -63,31 +63,39 @@ public class ${config.sqliteOpenHelperClassName} extends SQLiteOpenHelper {
         // Use the application context, which will ensure that you
         // don't accidentally leak an Activity's context.
         // See this article for more information: http://bit.ly/6LRzfx
-        if (sInstance == null) {
-            sInstance = newInstance(context.getApplicationContext());
+        return getInstance(context, "${config.databaseFileName}");
+    }
+
+    public static ${config.sqliteOpenHelperClassName} getInstance(Context context, String dbName) {
+        // Use the application context, which will ensure that you
+        // don't accidentally leak an Activity's context.
+        // See this article for more information: http://bit.ly/6LRzfx
+        if (sInstance == null || !sInstance.getDbName().equals(dbName)) {
+            sInstance = newInstance(context.getApplicationContext(), dbName);
         }
         return sInstance;
     }
 
-    private static ${config.sqliteOpenHelperClassName} newInstance(Context context) {
+    private static ${config.sqliteOpenHelperClassName} newInstance(Context context, String dbName) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
-            return newInstancePreHoneycomb(context);
+            return newInstancePreHoneycomb(context, dbName);
         }
-        return newInstancePostHoneycomb(context);
+        return newInstancePostHoneycomb(context, dbName);
     }
 
 
     /*
      * Pre Honeycomb.
      */
-    private static ${config.sqliteOpenHelperClassName} newInstancePreHoneycomb(Context context) {
-        return new ${config.sqliteOpenHelperClassName}(context);
+    private static ${config.sqliteOpenHelperClassName} newInstancePreHoneycomb(Context context, String dbName) {
+        return new ${config.sqliteOpenHelperClassName}(context, dbName);
     }
 
-    private ${config.sqliteOpenHelperClassName}(Context context) {
-        super(context, DATABASE_FILE_NAME, null, DATABASE_VERSION);
+    private ${config.sqliteOpenHelperClassName}(Context context, String dbName) {
+        super(context, dbName, null, DATABASE_VERSION);
         mContext = context;
         mOpenHelperCallbacks = new ${config.sqliteOpenHelperCallbacksClassName}();
+        this.dbName = dbName;
     }
 
 
@@ -95,15 +103,16 @@ public class ${config.sqliteOpenHelperClassName} extends SQLiteOpenHelper {
      * Post Honeycomb.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private static ${config.sqliteOpenHelperClassName} newInstancePostHoneycomb(Context context) {
-        return new ${config.sqliteOpenHelperClassName}(context, new DefaultDatabaseErrorHandler());
+    private static ${config.sqliteOpenHelperClassName} newInstancePostHoneycomb(Context context, String dbName) {
+        return new ${config.sqliteOpenHelperClassName}(context, new DefaultDatabaseErrorHandler(), dbName);
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private ${config.sqliteOpenHelperClassName}(Context context, DatabaseErrorHandler errorHandler) {
-        super(context, DATABASE_FILE_NAME, null, DATABASE_VERSION, errorHandler);
+    private ${config.sqliteOpenHelperClassName}(Context context, DatabaseErrorHandler errorHandler, String dbName) {
+        super(context, dbName, null, DATABASE_VERSION, errorHandler);
         mContext = context;
         mOpenHelperCallbacks = new ${config.sqliteOpenHelperCallbacksClassName}();
+        this.dbName = dbName;
     }
 
 
@@ -155,5 +164,9 @@ public class ${config.sqliteOpenHelperClassName} extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         mOpenHelperCallbacks.onUpgrade(mContext, db, oldVersion, newVersion);
+    }
+    
+    public String getDbName() {
+        return dbName;
     }
 }
