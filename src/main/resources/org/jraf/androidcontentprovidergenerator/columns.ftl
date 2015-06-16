@@ -24,6 +24,10 @@ public class ${entity.nameCamelCase}Columns implements BaseColumns {
     public static Uri getContentUri() {
         return Uri.parse(${config.providerClassName}.getContentUriBase() + "/" + TABLE_NAME);
     }
+    
+    public static Uri getContentUri(String authority) {
+        return Uri.parse(${config.providerClassName}.getContentUriBase(authority) + "/" + TABLE_NAME);
+    }
 
     <#list entity.fields as field>
         <#if field.documentation??>
