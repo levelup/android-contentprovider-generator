@@ -87,11 +87,10 @@ public class ${config.providerClassName} extends BaseContentProvider {
     }
 
 	public static void addAuthority(String newAuthority) {
-        AUTHORITY = newAuthority;
 
         <#list model.entities as entity>
-        URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME, URI_TYPE_${entity.nameUpperCase});
-        URI_MATCHER.addURI(AUTHORITY, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
+        URI_MATCHER.addURI(newAuthority, ${entity.nameCamelCase}Columns.TABLE_NAME, URI_TYPE_${entity.nameUpperCase});
+        URI_MATCHER.addURI(newAuthority, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
         </#list>
         
         ${config.uriMatcherComplement}
