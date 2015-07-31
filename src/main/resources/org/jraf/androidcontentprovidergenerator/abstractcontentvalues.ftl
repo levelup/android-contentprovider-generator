@@ -16,6 +16,13 @@ public abstract class AbstractContentValues {
     public abstract Uri uri();
 
     /**
+     * Returns the {@code uri} argument to pass to the {@code ContentResolver} methods given a specific authority
+     *
+     * @param authority The authority to use.
+     */
+    public abstract Uri uri(String authority);
+
+    /**
      * Returns the {@code ContentValues} wrapped by this object.
      */
     public ContentValues values() {

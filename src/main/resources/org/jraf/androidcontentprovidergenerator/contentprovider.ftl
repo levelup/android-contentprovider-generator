@@ -93,7 +93,7 @@ public class ${config.providerClassName} extends BaseContentProvider {
         URI_MATCHER.addURI(newAuthority, ${entity.nameCamelCase}Columns.TABLE_NAME + "/#", URI_TYPE_${entity.nameUpperCase}_ID);
         </#list>
         
-        ${config.uriMatcherComplement}
+        ${config.uriMatcherComplementAdd}
     }
 
     private static UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);

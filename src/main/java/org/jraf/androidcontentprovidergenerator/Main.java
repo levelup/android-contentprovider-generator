@@ -464,6 +464,9 @@ public class Main {
 		File outputFile = new File(providerDir, config.getString(Json.PROVIDER_CLASS_NAME) + ".java");
 		Writer out = new OutputStreamWriter(new FileOutputStream(outputFile));
 
+		String uriMatcherComplement = config.getString("uriMatcherComplement");
+		config.put("uriMatcherComplementAdd", uriMatcherComplement.replace("AUTHORITY", "newAuthority"));
+
 		Map<String, Object> root = new HashMap<>();
 		root.put("config", config);
 		root.put("model", Model.get());

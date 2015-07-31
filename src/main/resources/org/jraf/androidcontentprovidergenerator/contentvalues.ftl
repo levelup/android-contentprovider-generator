@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 </#if>
 
 import ${config.providerJavaPackage}.base.AbstractContentValues;
+import ${config.providerJavaPackage}.${config.providerClassName};
 
 /**
  * Content values wrapper for the {@code ${entity.nameLowerCase}} table.
@@ -21,6 +22,11 @@ public class ${entity.nameCamelCase}ContentValues extends AbstractContentValues 
     @Override
     public Uri uri() {
         return ${entity.nameCamelCase}Columns.getContentUri();
+    }
+    
+    @Override
+    public Uri uri(String authority) {
+        return Uri.parse(RSSProvider.getContentUriBase(authority) + "/" + ${entity.nameCamelCase}Columns.TABLE_NAME);
     }
 
     /**
@@ -31,6 +37,17 @@ public class ${entity.nameCamelCase}ContentValues extends AbstractContentValues 
      */
     public int update(ContentResolver contentResolver, <#if config.useAnnotations>@Nullable</#if> ${entity.nameCamelCase}Selection where) {
         return contentResolver.update(uri(), values(), where == null ? null : where.sel(), where == null ? null : where.args());
+    }
+
+    /**
+     * Update row(s) using the values stored by this object, the given selection and  a specific authority
+     *
+     * @param authority The authority to use.
+     * @param contentResolver The content resolver to use.
+     * @param where The selection to use (can be {@code null}).
+     */
+    public int update(String authority, ContentResolver contentResolver, <#if config.useAnnotations>@Nullable</#if> ${entity.nameCamelCase}Selection where) {
+        return contentResolver.update(uri(authority), values(), where == null ? null : where.sel(), where == null ? null : where.args());
     }
     <#list entity.fields as field>
         <#if field.nameLowerCase != "_id">
