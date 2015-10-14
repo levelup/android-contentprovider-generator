@@ -37,4 +37,13 @@ public abstract class AbstractContentValues {
     public Uri insert(ContentResolver contentResolver) {
         return contentResolver.insert(uri(), values());
     }
+
+    /**
+     * Inserts a row into a table using the values stored by this object for an authority.
+     * 
+     * @param contentResolver The content resolver to use.
+     */
+    public Uri insert(String authority, ContentResolver contentResolver) {
+        return contentResolver.insert(uri(authority), values());
+    }
 }
